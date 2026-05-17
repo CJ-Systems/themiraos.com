@@ -35,17 +35,16 @@ jobs:
 
         - name: Ensure Pages project exists
           run: |
-            curl -sS -X POST \
+            response=$(curl -sS -X POST \
               "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects" \
               -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
               -H "Content-Type: application/json" \
-              --data '{"name":"themiraos","production_branch":"main"}' \
-              | tee /tmp/cf-create.json
-            echo
-            # Success (200) or already-exists (8000008) both mean "project ready"
-            if grep -q '"success":true' /tmp/cf-create.json; then
+              --data '{"name":"themiraos","production_branch":"main"}')
+            echo "$response" | jq .
+            # Success (created) or 8000008 (already exists) both mean "project ready"
+            if echo "$response" | jq -e '.success' > /dev/null; then
               echo "Project created."
-            elif grep -q '"code":8000008' /tmp/cf-create.json; then
+            elif echo "$response" | jq -e '.errors[]? | select(.code == 8000008)' > /dev/null; then
               echo "Project already exists; continuing."
             else
               echo "Unexpected response — failing."
