@@ -77,19 +77,31 @@ jobs:
 
         - name: Ensure apex CNAME points to Pages
           run: |
-            # Look up the zone ID for themiraos.com
+            # Look up the zone ID (requires Zone:Read)
             zone_response=$(curl -sS \
               "https://api.cloudflare.com/client/v4/zones?name=themiraos.com" \
               -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")
             zone_id=$(echo "$zone_response" | jq -r '.result[0].id // empty')
             if [ -z "$zone_id" ]; then
-              echo "Could not find zone for themiraos.com (token may lack Zone:Read)"
+              echo "Could not find zone for themiraos.com"
               echo "$zone_response" | jq .
               exit 1
             fi
             echo "Zone ID: $zone_id"
 
-            # Create CNAME at apex → themiraos.pages.dev (proxied; uses CNAME flattening)
+            # GET first — does an apex CNAME (or A) already exist? (requires Zone:Read only)
+            existing=$(curl -sS \
+              "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records?name=themiraos.com" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              | jq -r '.result[] | select(.type == "CNAME" or .type == "A") | .id' | head -1)
+
+            if [ -n "$existing" ]; then
+              echo "Apex record already exists (id: $existing); nothing to do."
+              exit 0
+            fi
+
+            # No record found — try to create one (requires Zone:DNS:Edit)
+            echo "No apex record found; attempting to create CNAME..."
             record_response=$(curl -sS -X POST \
               "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records" \
               -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
@@ -99,9 +111,8 @@ jobs:
 
             if echo "$record_response" | jq -e '.success' > /dev/null; then
               echo "CNAME created."
-            elif echo "$record_response" | jq -e '.errors[]? | select(.message | test("already|exists|identical"; "i"))' > /dev/null; then
-              echo "CNAME already exists; continuing."
             else
-              echo "Failed to create CNAME (token may lack Zone:DNS:Edit)."
+              echo "Failed to create CNAME — token likely lacks Zone:DNS:Edit."
+              echo "Add the record manually in the Cloudflare dashboard, or grant the token DNS:Edit permission."
               exit 1
             fi
