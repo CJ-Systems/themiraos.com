@@ -44,7 +44,7 @@ jobs:
             # Success (created) or 8000008 (already exists) both mean "project ready"
             if echo "$response" | jq -e '.success' > /dev/null; then
               echo "Project created."
-            elif echo "$response" | jq -e '.errors[]? | select(.code == 8000008)' > /dev/null; then
+            elif echo "$response" | jq -e '.errors[]? | select(.message | test("already exists"; "i"))' > /dev/null; then
               echo "Project already exists; continuing."
             else
               echo "Unexpected response — failing."
