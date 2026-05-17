@@ -57,3 +57,20 @@ jobs:
             apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
             command: pages deploy dna/public --project-name=themiraos --branch=main --commit-dirty=true
+
+        - name: Ensure custom domain attached
+          run: |
+            response=$(curl -sS -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/themiraos/domains" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data '{"name":"themiraos.com"}')
+            echo "$response" | jq .
+            if echo "$response" | jq -e '.success' > /dev/null; then
+              echo "Domain themiraos.com attached."
+            elif echo "$response" | jq -e '.errors[]? | select(.message | test("already"; "i"))' > /dev/null; then
+              echo "Domain themiraos.com already attached; continuing."
+            else
+              echo "Failed to attach domain — unexpected response."
+              exit 1
+            fi
