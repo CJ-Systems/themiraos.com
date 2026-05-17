@@ -74,3 +74,34 @@ jobs:
               echo "Failed to attach domain — unexpected response."
               exit 1
             fi
+
+        - name: Ensure apex CNAME points to Pages
+          run: |
+            # Look up the zone ID for themiraos.com
+            zone_response=$(curl -sS \
+              "https://api.cloudflare.com/client/v4/zones?name=themiraos.com" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")
+            zone_id=$(echo "$zone_response" | jq -r '.result[0].id // empty')
+            if [ -z "$zone_id" ]; then
+              echo "Could not find zone for themiraos.com (token may lack Zone:Read)"
+              echo "$zone_response" | jq .
+              exit 1
+            fi
+            echo "Zone ID: $zone_id"
+
+            # Create CNAME at apex → themiraos.pages.dev (proxied; uses CNAME flattening)
+            record_response=$(curl -sS -X POST \
+              "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data '{"type":"CNAME","name":"themiraos.com","content":"themiraos.pages.dev","proxied":true,"ttl":1}')
+            echo "$record_response" | jq .
+
+            if echo "$record_response" | jq -e '.success' > /dev/null; then
+              echo "CNAME created."
+            elif echo "$record_response" | jq -e '.errors[]? | select(.message | test("already|exists|identical"; "i"))' > /dev/null; then
+              echo "CNAME already exists; continuing."
+            else
+              echo "Failed to create CNAME (token may lack Zone:DNS:Edit)."
+              exit 1
+            fi
