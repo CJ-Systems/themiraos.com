@@ -34,12 +34,23 @@ jobs:
           run: hugo --minify --gc
 
         - name: Ensure Pages project exists
-          uses: cloudflare/wrangler-action@v3
-          with:
-            apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-            accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-            command: pages project create themiraos --production-branch=main
-          continue-on-error: true
+          run: |
+            curl -sS -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data '{"name":"themiraos","production_branch":"main"}' \
+              | tee /tmp/cf-create.json
+            echo
+            # Success (200) or already-exists (8000008) both mean "project ready"
+            if grep -q '"success":true' /tmp/cf-create.json; then
+              echo "Project created."
+            elif grep -q '"code":8000008' /tmp/cf-create.json; then
+              echo "Project already exists; continuing."
+            else
+              echo "Unexpected response — failing."
+              exit 1
+            fi
 
         - name: Deploy to Cloudflare Pages
           uses: cloudflare/wrangler-action@v3
