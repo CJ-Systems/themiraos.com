@@ -30,6 +30,14 @@ jobs:
           working-directory: ./dna
           run: hugo --minify --gc
 
+        - name: Ensure Pages project exists
+          uses: cloudflare/wrangler-action@v3
+          with:
+            apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+            accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            command: pages project create themiraos --production-branch=main
+          continue-on-error: true
+
         - name: Deploy to Cloudflare Pages
           uses: cloudflare/wrangler-action@v3
           with:
