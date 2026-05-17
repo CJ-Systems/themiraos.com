@@ -1,0 +1,23 @@
+baseURL = 'https://themiraos.com/'
+defaultContentLanguage = 'en'
+title = 'Mira · themiraos.com'
+theme = 'themiraos'
+
+[languages.en]
+  locale = 'en-us'
+  weight = 1
+
+[params]
+  description = 'An assistant being built around the idea that the agent should be the user interface, not a feature inside one.'
+  ogImage = '/Mira.png'
+  tagline = 'The MiraOS — Your OS, your agent, in service of you.'
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.goldmark.extensions.typographer]
+  disable = true
+
+[outputs]
+  home = ['HTML', 'RSS']
+  section = ['HTML', 'RSS']

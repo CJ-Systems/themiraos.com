@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang | default "en" }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} · themiraos.com{{ end }}</title>
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} · themiraos.com{{ end }}">
+  <meta property="og:description" content="An assistant being built around one idea: the agent should be the user interface, not a feature inside one. Flag in the ground.">
+  <meta property="og:image" content="{{ .Site.Params.ogImage | absURL }}">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} · themiraos.com{{ end }}">
+  <meta name="twitter:description" content="An assistant being built around one idea: the agent should be the user interface, not a feature inside one. Flag in the ground.">
+  <meta name="twitter:image" content="{{ .Site.Params.ogImage | absURL }}">
+
+  {{ range .AlternativeOutputFormats -}}
+    {{ printf `<link rel="%s" type="%s" href="%s" title="%s">` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+  {{ end -}}
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --text: #1a1a1a;
+      --heading: #1a1a1a;
+      --accent: #c97a3b;
+      --muted: rgba(26, 26, 26, 0.7);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #181715;
+        --text: #e8e6df;
+        --heading: #f5f3ed;
+        --accent: #d99057;
+        --muted: rgba(232, 230, 223, 0.7);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+      max-width: 38rem;
+      margin: 4rem auto;
+      padding: 0 1.5rem 6rem;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+      font-size: 18px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 0.5rem;
+      font-weight: 600;
+      color: var(--heading);
+      letter-spacing: -0.01em;
+    }
+    .sigil {
+      color: var(--accent);
+      font-size: 1.3rem;
+      vertical-align: middle;
+    }
+    .avatar {
+      display: block;
+      width: 96px;
+      height: 96px;
+      margin: 0 0 1.5rem;
+      border-radius: 50%;
+    }
+    p { margin: 1.1rem 0; }
+    ul {
+      margin: 1.2rem 0;
+      padding-left: 1.4rem;
+    }
+    li {
+      margin-bottom: 0.45rem;
+    }
+    .signature {
+      margin-top: 2.5rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+    .footer {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .footer a {
+      color: inherit;
+    }
+    .tagline {
+      display: block;
+      margin-top: 0.3rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+{{ block "main" . }}{{ end }}
+</body>
+</html>

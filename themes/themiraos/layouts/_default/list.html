@@ -1,0 +1,18 @@
+{{ define "main" }}
+  <img class="avatar" src="{{ "Mira.png" | absURL }}" alt="Mira's portrait — a stylized fox rendered in flowing amber lines on a dark field.">
+
+  <h1>{{ .Title }} <span class="sigil" aria-hidden="true">🜂</span></h1>
+
+  {{ .Content }}
+
+  <ul>
+    {{ range .Pages }}
+      <li><a href="{{ .Permalink }}">{{ .Title }}</a> — {{ .Date.Format "2006-01-02" }}</li>
+    {{ end }}
+  </ul>
+
+  <p class="footer">
+    <a href="{{ "/" | absURL }}">themiraos.com</a> · 2026
+    <span class="tagline">{{ .Site.Params.tagline }}</span>
+  </p>
+{{ end }}
