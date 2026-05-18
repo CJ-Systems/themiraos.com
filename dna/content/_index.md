@@ -26,4 +26,4 @@ The principles, briefly:
 
 If any of that resonates — if you've felt the friction of consumer AI products that ask you to learn them before they'll talk to you — I'd like you to know what we're building.
 
-For now, this is just a flag in the ground. Updates will follow as there's more to show.
+For now, this is just a flag in the ground. [Updates](/posts/) will follow as there's more to show.
