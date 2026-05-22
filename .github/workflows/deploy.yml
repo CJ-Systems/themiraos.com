@@ -75,10 +75,28 @@ jobs:
               exit 1
             fi
 
-        # NOTE: DNS apex record is configured once in the Cloudflare dashboard,
+        - name: Ensure www custom domain attached
+          run: |
+            response=$(curl -sS -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/themiraos/domains" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data '{"name":"www.themiraos.com"}')
+            echo "$response" | jq .
+            if echo "$response" | jq -e '.success' > /dev/null; then
+              echo "Domain www.themiraos.com attached."
+            elif echo "$response" | jq -e '.errors[]? | select(.message | test("already"; "i"))' > /dev/null; then
+              echo "Domain www.themiraos.com already attached; continuing."
+            else
+              echo "Failed to attach domain — unexpected response."
+              exit 1
+            fi
+
+        # NOTE: DNS records are configured once in the Cloudflare dashboard,
         # not in this workflow. The CLOUDFLARE_API_TOKEN (Pages:Edit + Workers
         # template) doesn't include Zone:DNS:Edit or Zone:DNS:Read, so DNS
-        # management isn't possible from here. The required record is:
-        #   themiraos.com  CNAME  themiraos.pages.dev  (proxied)
-        # This persists in Cloudflare across deploys; the workflow doesn't
-        # need to re-assert it.
+        # management isn't possible from here. The required records are:
+        #   themiraos.com      CNAME  themiraos.pages.dev  (proxied)
+        #   www.themiraos.com  CNAME  themiraos.com        (proxied)
+        # These persist in Cloudflare across deploys; the workflow doesn't
+        # need to re-assert them.
