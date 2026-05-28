@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recovery Map — Read-Only Report</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #070604;
+    --panel: #14100b;
+    --panel-soft: #1d160e;
+    --panel-raised: #19130d;
+    --ink: #f6efe4;
+    --muted: #b8aa99;
+    --line: #3f2d17;
+    --line-strong: #75501f;
+    --amber: #ff9f1a;
+    --amber-bright: #ffc15d;
+    --amber-soft: rgba(255, 159, 26, .14);
+    --green: #4ade80;
+    --green-soft: rgba(74, 222, 128, .14);
+    --blue: #a78bfa;
+    --blue-soft: rgba(167, 139, 250, .14);
+    --red: #fb7185;
+    --red-soft: rgba(251, 113, 133, .14);
+    --gray-soft: rgba(255, 255, 255, .07);
+    --violet: #a78bfa;
+    --shadow: 0 18px 48px rgba(0, 0, 0, .42);
+    --glow: 0 0 0 1px rgba(255, 159, 26, .18),
+      0 16px 38px rgba(0, 0, 0, .36);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    background:
+      linear-gradient(180deg, #140d06 0, var(--bg) 420px);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+  .page {
+    width: min(1120px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 48px;
+  }
+  .hero {
+    padding: 28px 0 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .kicker {
+    margin: 0 0 8px;
+    color: var(--amber);
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  h1 {
+    max-width: 760px;
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1.02;
+    letter-spacing: 0;
+  }
+  .subtitle {
+    max-width: 760px;
+    margin: 14px 0 0;
+    color: #d9cdbf;
+    font-size: 1.03rem;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: .88rem;
+  }
+  .hero .meta {
+    margin-top: 18px;
+  }
+  .promise {
+    margin-top: 18px;
+    background: linear-gradient(90deg, var(--amber-soft), rgba(255, 159, 26, .05));
+    border: 1px solid rgba(255, 159, 26, .35);
+    border-left: 5px solid var(--amber);
+    padding: .85rem 1rem;
+    border-radius: 8px;
+    font-weight: 650;
+    box-shadow: 0 0 28px rgba(255, 159, 26, .08);
+  }
+  .section {
+    margin-top: 28px;
+    padding-top: 4px;
+  }
+  h2 {
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    color: var(--amber-bright);
+    font-size: 1.25rem;
+  }
+  h3 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+  }
+  .callout, .note {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: var(--glow);
+  }
+  .callout p, .note p { margin: 0; }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0 18px;
+  }
+  .metric {
+    min-width: 0;
+    background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: var(--glow);
+  }
+  .metric strong {
+    display: block;
+    color: var(--amber-bright);
+    font-size: 1.45rem;
+    line-height: 1.1;
+  }
+  .metric span {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 700;
+  }
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--glow);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 620px;
+  }
+  th, td {
+    border-bottom: 1px solid var(--line);
+    padding: .55rem .7rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: 0; }
+  th {
+    background: var(--panel-soft);
+    color: var(--amber-bright);
+    font-size: .78rem;
+    text-transform: uppercase;
+  }
+  code {
+    overflow-wrap: anywhere;
+    background: var(--gray-soft);
+    padding: .08rem .32rem;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .88em;
+  }
+  pre {
+    max-height: 230px;
+    margin: 12px 0 0;
+    background: #0b0907;
+    color: #f2dfc0;
+    border: 1px solid var(--line);
+    padding: .9rem 1rem;
+    border-radius: 8px;
+    overflow: auto;
+  }
+  .cluster-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .cluster {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+    box-shadow: var(--glow);
+  }
+  .cluster-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--line);
+  }
+  .cluster-head h3 {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: .16rem .55rem;
+    border-radius: 999px;
+    font-size: .76rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .High { background: var(--green-soft); color: #86efac; }
+  .Medium { background: var(--amber-soft); color: var(--amber-bright); }
+  .Low { background: var(--blue-soft); color: #c4b5fd; }
+  .cluster ul, .compact-list {
+    margin: 10px 0 0;
+    padding-left: 1.1rem;
+  }
+  .cluster li { margin: .24rem 0; }
+  .cluster li ul { margin-top: .28rem; }
+  .twin { color: var(--violet); font-weight: 700; }
+  .narrative {
+    background:
+      linear-gradient(180deg, rgba(255, 159, 26, .08), rgba(20, 16, 11, .92));
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .narrative p {
+    margin: .6rem 0;
+  }
+  .narrative p:first-child { margin-top: 0; }
+  .narrative p:last-child { margin-bottom: 0; }
+  @media (max-width: 920px) {
+    .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cluster-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .page { width: min(100% - 20px, 1120px); padding-top: 18px; }
+    .hero { padding-top: 14px; }
+    .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .metric strong { font-size: 1.22rem; }
+    .cluster { padding: 12px; }
+  }
+</style></head><body>
+<main class="page">
+<style>
+  .lede {
+    padding: 40px 0 30px;
+    border-bottom: 1px solid var(--line);
+    max-width: 720px;
+  }
+  .lede .kicker {
+    color: var(--amber);
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin: 0 0 18px;
+  }
+  .lede p {
+    margin: 0 0 1.05em;
+    font-size: 1.12rem;
+    line-height: 1.62;
+    color: var(--ink);
+  }
+  .lede p.artifact-line {
+    color: var(--amber-bright);
+    font-weight: 700;
+    font-size: 1.28rem;
+  }
+  .lede em { color: var(--muted); font-style: italic; }
+  .lede + .hero { padding-top: 30px; }
+</style>
+<section class="lede">
+<p class="kicker">Build in public · Mira-OS</p>
+<p>Today I asked Mira how she could help me make sense of my recovery folder that&#x27;s been sitting on my backup drive.</p>
+<p>Much like my office, it is not a clean folder.</p>
+<p>And that matters, because Mira-OS started as something personal: an attempt to build an AI system that works with the way I actually think, not the way a productivity app assumes I should think. The folder has scattered AI work, old sessions, project notes, memory files, recovered transcripts, prototypes, exports, and even a few unrelated projects.</p>
+<p>Her answer was not <em>&#x201C;let me reorganize it for you.&#x201D;</em></p>
+<p>It was: build a read-only map first.</p>
+<p>No files moved. No files renamed. No cleanup pass. Just scan what&#x27;s there, preserve the original paths, detect project clusters, show the evidence, and suggest possible structures before I choose what happens next. That&#x27;s today&#x27;s build-in-public artifact for Mira-OS:</p>
+<p class="artifact-line">a local map of scattered AI work.</p>
+<p>The goal is simple: make lost context visible again.</p>
+</section>
+<header class='hero'>
+<p class='kicker'>Read-only recovery map</p>
+<h1>Make the recovered work visible before moving anything.</h1>
+<p class='subtitle'>A deterministic report over the recovery folder: original paths, provisional clusters, evidence, confidence, and advisory next moves.</p>
+<p class='meta'>Generated: 2026-05-28T03:32:32.028005+00:00<br>Source (read-only, untouched): <code>Recovery/</code></p>
+<p class='promise'>No files were moved, renamed, deleted, or modified. This is a map of your existing work, not a reorganization of it.</p>
+</header>
+<section class='section'>
+<h2>Noticed Taxonomy</h2>
+<div class='callout'>
+<p>A top-level taxonomy-like file is present: <strong><code>top-level-knowledge-domains.md</code></strong>. Surfaced for awareness only; <strong>not</strong> ingested as clustering input.</p>
+<pre># Top-Level Knowledge Domains
+### A Universal Domain Reference for Personal Knowledge Classification
+
+---
+
+## 1. [[MOC - The Formal Sciences]]
+Pure systems of logic and structure independent of the ph</pre>
+</div>
+</section>
+<section class='section'>
+<h2>Path Map</h2>
+<div class='metrics'>
+<div class='metric'><strong>6365</strong><span>files inventoried</span></div>
+<div class='metric'><strong>35</strong><span>clusters detected</span></div>
+<div class='metric'><strong>1</strong><span>high confidence</span></div>
+<div class='metric'><strong>15</strong><span>medium confidence</span></div>
+<div class='metric'><strong>3</strong><span>cross-bucket twins</span></div>
+<div class='metric'><strong>9</strong><span>unsorted loose files</span></div>
+</div>
+<h3>Preservation buckets (low-confidence containers)</h3>
+<div class='table-wrap'><table><tr><th>Bucket</th><th>Files</th><th>Meaningful children</th></tr>
+<tr><td><code>2/</code></td><td>1162</td><td>Mira, MiraOS, brain, cron, memory, projects, sessions</td></tr>
+<tr><td><code>3/</code></td><td>3335</td><td>-home-[user]--openclaw-workspace, LCARS, Mira Ember, Mira OS, Vault, dev, graph-views, lab-data-models, memory, projects, services, sessions, wiki</td></tr>
+<tr><td><code>4/</code></td><td>407</td><td>-home-miraember-projects-Mira-OS, Reference, memory, ontologies</td></tr>
+</table></div>
+<p class='meta'>Numeric buckets carry no semantic meaning — they exist to avoid overwriting same-named backups.</p>
+</section>
+<section class='section'>
+<h2>Project Clusters</h2>
+<div class='note'><p>Confidence describes evidence strength, not importance. A low-confidence cluster may still hold valuable work — it just means the scanner has weak evidence for naming it.</p></div>
+<div class='cluster-grid'>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>LCARS</h3>
+<span class='badge High'>High</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/LCARS</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> High — three independent signals agree + enough files</li>
+<li><strong>Files:</strong> 1276 · <strong>Size:</strong> 14.8 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared filename token &#x27;moc&#x27; (1084/1276)</li>
+<li>shared content token &#x27;moc&#x27; (1017/1276)</li>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/LCARS/obsidian-moc-generator-skill/obsidian-moc-generator/README.md</code></li>
+<li><code>3/LCARS/Template/MKOM-Templates/README.md</code></li>
+<li><code>3/LCARS/Template/Tier1-KOM/Domain9-TCKOM/README.md</code></li>
+<li><code>3/LCARS/Template/Tier1-KOM/Domain1-Extension/README.md</code></li>
+<li><code>3/LCARS/Template/Software3-Knowledge-Objects/README.md</code></li>
+</ul></li>
+<li><strong>Loose files attached (1):</strong><ul>
+<li><code>3/lcars-miras-brain/lcars-manifesto-spec.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>Vault</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/Vault</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 1086 · <strong>Size:</strong> 7.0 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Software project:</strong> yes (metadata-only)</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/Vault/02 Projects/PSF/05 Archive/project-variants/Evaryan 0/README.md</code></li>
+<li><code>3/Vault/02 Projects/PSF/05 Archive/project-variants/Evaryan-MMO 0/README.md</code></li>
+<li><code>3/Vault/02 Projects/PSF/05 Archive/project-variants/Evaryan 2/README.md</code></li>
+<li><code>3/Vault/02 Projects/PSF/05 Archive/project-variants/Evaryan-MMO/README.md</code></li>
+<li><code>3/Vault/02 Projects/PSF/05 Archive/project-variants/Evaryan 0/assets/README.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>MiraOS</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>2/MiraOS</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 663 · <strong>Size:</strong> 106.4 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>2/MiraOS/wiki/main/index.md</code></li>
+<li><code>2/MiraOS/wiki/main/sources/index.md</code></li>
+<li><code>2/MiraOS/Mira-OS/history/librarian-vault/docs/decisions/README.md</code></li>
+<li><code>2/MiraOS/workspace/memory/import/README.md</code></li>
+<li><code>2/MiraOS/Mira-OS/history/librarian-vault/README.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>Mira OS</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/Mira OS</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 646 · <strong>Size:</strong> 5.8 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared content token &#x27;openclaw&#x27; (443/646)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/Mira OS/Openclaw Documentation/nodes/index.md</code></li>
+<li><code>3/Mira OS/Openclaw Documentation/gateway/security/index.md</code></li>
+<li><code>3/Mira OS/Openclaw Documentation/gateway/index.md</code></li>
+<li><code>3/Mira OS/Openclaw Documentation/tools/index.md</code></li>
+<li><code>3/Mira OS/Openclaw Documentation/cli/index.md</code></li>
+</ul></li>
+<li><strong>Loose files attached (2):</strong><ul>
+<li><code>3/source/install-mira-cognee-service.sh</code></li>
+<li><code>3/source/mira-cognee.service</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>mocs</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>mocs</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 301 · <strong>Size:</strong> 2.0 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared filename token &#x27;moc&#x27; (301/301)</li>
+<li>shared content token &#x27;knowledge&#x27; (244/301)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>mocs/MOC - Neurophysiology.md</code></li>
+<li><code>mocs/MOC - Genomics.md</code></li>
+<li><code>mocs/MOC - Evolutionary Genetics.md</code></li>
+<li><code>mocs/MOC - Memory Systems.md</code></li>
+<li><code>mocs/MOC - Neuroprosthetics.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>ontologies</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>4/ontologies</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 272 · <strong>Size:</strong> 35.0 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared content token &#x27;locode&#x27; (242/272)</li>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>4/ontologies/astronomical/simbad-object-types.txt</code></li>
+<li><code>4/ontologies/mathematical/msc2020.csv</code></li>
+<li><code>4/ontologies/mathematical/acm-ccs-2012.xml</code></li>
+<li><code>4/ontologies/document-media/iana-media-types.xml</code></li>
+<li><code>4/ontologies/economic/isic-rev4.txt</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>mocs2</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>mocs2</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 216 · <strong>Size:</strong> 1.6 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared filename token &#x27;moc&#x27; (216/216)</li>
+<li>shared content token &#x27;sciences&#x27; (175/216)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>mocs2/MOC - Neurophysiology.md</code></li>
+<li><code>mocs2/MOC - Genomics.md</code></li>
+<li><code>mocs2/MOC - Evolutionary Genetics.md</code></li>
+<li><code>mocs2/MOC - Neuroprosthetics.md</code></li>
+<li><code>mocs2/MOC - Perception Science.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>Mira Ember</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/Mira Ember</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 136 · <strong>Size:</strong> 18.2 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared content token &#x27;mira&#x27; (68/136)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/Mira Ember/Backup/memory/import/README.md</code></li>
+<li><code>3/Mira Ember/import/README.md</code></li>
+<li><code>3/Mira Ember/Backup/memory/wiki/INDEX.md</code></li>
+<li><code>3/Mira Ember/Backup/memory/import/10_To-Reflect-On/README.md</code></li>
+<li><code>3/Mira Ember/import/10_To-Reflect-On/README.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>workspace</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>workspace</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 131 · <strong>Size:</strong> 1.1 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared content token &#x27;memory&#x27; (73/131)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>workspace/memory/import/README.md</code></li>
+<li><code>workspace/memory/import/10_To-Reflect-On/README.md</code></li>
+<li><code>workspace/memory/import/20_To-Process/README.md</code></li>
+<li><code>workspace/memory/import/00_Inbox/README.md</code></li>
+<li><code>workspace/memory/import/30_Processed/README.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>Mira</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>2/Mira</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 103 · <strong>Size:</strong> 852.5 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared content token &#x27;memory&#x27; (57/103)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>2/Mira/wiki/main/index.md</code></li>
+<li><code>2/Mira/wiki/main/sources/index.md</code></li>
+<li><code>2/Mira/workspace/memory/import/README.md</code></li>
+<li><code>2/Mira/workspace/memory/import/10_To-Reflect-On/README.md</code></li>
+<li><code>2/Mira/wiki/main/reports/index.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>Reference</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>4/Reference</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 55 · <strong>Size:</strong> 395.1 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared content token &#x27;memory&#x27; (31/55)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>4/Reference/memory/import/README.md</code></li>
+<li><code>4/Reference/memory/import/10_To-Reflect-On/README.md</code></li>
+<li><code>4/Reference/memory/import/20_To-Process/README.md</code></li>
+<li><code>4/Reference/memory/import/00_Inbox/README.md</code></li>
+<li><code>4/Reference/memory/import/30_Processed/README.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>brain</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>brain</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 44 · <strong>Size:</strong> 1.8 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared content token &#x27;description&#x27; (28/44)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>brain/neo4j/schema/indexes.cypher</code></li>
+<li><code>brain/ontology/external_standards_crosswalk.json</code></li>
+<li><code>brain/ontology/datasets/arts-media-culture/knowledge_domains.json</code></li>
+<li><code>brain/ontology/datasets/sciences-technology/knowledge_domains.json</code></li>
+<li><code>brain/ontology/datasets/humanities-society/knowledge_domains.json</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>poc-memory-schema</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>poc-memory-schema</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 14 · <strong>Size:</strong> 187.7 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared filename token &#x27;ontology&#x27; (7/14)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>poc-memory-schema/README.md</code></li>
+<li><code>poc-memory-schema/postgres_openclaw_memory.sql</code></li>
+<li><code>poc-memory-schema/lcars_ontology_mapping.json</code></li>
+<li><code>poc-memory-schema/lcars_ontology.md</code></li>
+<li><code>poc-memory-schema/validate_lcars_cognee_ontology.py</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>dev</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/dev</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 9 · <strong>Size:</strong> 134.1 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared content token &#x27;cognee&#x27; (8/9)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/dev/INDEX.md</code></li>
+<li><code>3/dev/2026-05-02-memory-castle-v0.2-completion.md</code></li>
+<li><code>3/dev/2026-05-02-persistent-memory-setup-guide.md</code></li>
+<li><code>3/dev/2026-05-02-learnings-cognee-api.md</code></li>
+<li><code>3/dev/2026-05-01-memory-castle-v0.2-context.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>template (inferred from 6/6 filenames)</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>temp</code></li>
+<li><strong>Name source:</strong> dominant-token</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 6 · <strong>Size:</strong> 12.3 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared filename token &#x27;template&#x27; (6/6)</li>
+<li>shared content token &#x27;proof&#x27; (3/6)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>temp/Template 3 - Formula.md</code></li>
+<li><code>temp/Template 5 - Proof.md</code></li>
+<li><code>temp/Template 4 - Theorem.md</code></li>
+<li><code>temp/Template 6 - Lemma  Corollary.md</code></li>
+<li><code>temp/Template 2 - atomic concept nod.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>lab-data-models</h3>
+<span class='badge Medium'>Medium</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/lab-data-models</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Medium — two independent signals agree</li>
+<li><strong>Files:</strong> 4 · <strong>Size:</strong> 1.4 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>shared filename token &#x27;mira&#x27; (3/4)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/lab-data-models/README.md</code></li>
+<li><code>3/lab-data-models/mira-cognee-logical-model.json</code></li>
+<li><code>3/lab-data-models/mira-cognee-discovery.json</code></li>
+<li><code>3/lab-data-models/mira-cognee-lab-data-model.json</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>projects</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>projects</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 341 · <strong>Size:</strong> 108.3 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>projects/-home-[user]-dna-openclaw/adca9208-dfe8-483c-8162-d2384b678331.jsonl</code></li>
+<li><code>projects/-home-[user]-grid/df704d02-1d91-44b6-89d1-fae67b15df4b.jsonl</code></li>
+<li><code>projects/-home-[user]-grid/8d685bf3-9760-4306-b83c-d1077a0df4bb.jsonl</code></li>
+<li><code>projects/-home-[user]-dna/89a220eb-e31d-4911-8373-130c0351a98a.jsonl</code></li>
+<li><code>projects/-home-[user]-dna/3807a249-fcaa-43c8-87ea-19b92d851881.jsonl</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>sessions</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>sessions</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 329 · <strong>Size:</strong> 76.4 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared content token &#x27;pid&#x27; (329/329)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>sessions/102209.json</code></li>
+<li><code>sessions/125787.json</code></li>
+<li><code>sessions/100189.json</code></li>
+<li><code>sessions/125874.json</code></li>
+<li><code>sessions/125708.json</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>projects</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>2/projects</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 250 · <strong>Size:</strong> 86.5 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li class='twin'>Cross-bucket twin: <code>projects</code> in [&#x27;2&#x27;, &#x27;3&#x27;] — possible same project / possible diverged copies</li>
+<li><strong>Evidence:</strong><ul>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>2/projects/-home-[user]-dna-openclaw/adca9208-dfe8-483c-8162-d2384b678331.jsonl</code></li>
+<li><code>2/projects/-home-[user]-grid/8d685bf3-9760-4306-b83c-d1077a0df4bb.jsonl</code></li>
+<li><code>2/projects/-home-[user]-dna/89a220eb-e31d-4911-8373-130c0351a98a.jsonl</code></li>
+<li><code>2/projects/-home-[user]-dna/3807a249-fcaa-43c8-87ea-19b92d851881.jsonl</code></li>
+<li><code>2/projects/-home-[user]-dna/c32a86ce-1205-423e-9c34-065e15402084.jsonl</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>memory</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>4/memory</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 71 · <strong>Size:</strong> 335.9 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li class='twin'>Cross-bucket twin: <code>memory</code> in [&#x27;2&#x27;, &#x27;3&#x27;, &#x27;4&#x27;] — possible same project / possible diverged copies</li>
+<li><strong>Representative files:</strong><ul>
+<li><code>4/memory/reference_gbrain.md</code></li>
+<li><code>4/memory/feedback_codependentai_antipatterns.md</code></li>
+<li><code>4/memory/feedback_verify_rule_fires_not_just_exists.md</code></li>
+<li><code>4/memory/feedback_software_3_product_shape.md</code></li>
+<li><code>4/memory/feedback_capability_vs_content_prescription.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>memory-shared</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>memory-shared</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 69 · <strong>Size:</strong> 293.2 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Representative files:</strong><ul>
+<li><code>memory-shared/reference_gbrain.md</code></li>
+<li><code>memory-shared/feedback_codependentai_antipatterns.md</code></li>
+<li><code>memory-shared/feedback_software_3_product_shape.md</code></li>
+<li><code>memory-shared/feedback_ai_artisan_operational_takeaways.md</code></li>
+<li><code>memory-shared/project_stepping_stone_research_2026_05_20.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>sessions</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>2/sessions</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 62 · <strong>Size:</strong> 8.0 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li class='twin'>Cross-bucket twin: <code>sessions</code> in [&#x27;2&#x27;, &#x27;3&#x27;] — possible same project / possible diverged copies</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared filename token &#x27;befafabd&#x27; (51/62)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>2/sessions/0633999d-9917-4773-b6de-0f6c5054f642.trajectory.jsonl</code></li>
+<li><code>2/sessions/sessions.json</code></li>
+<li><code>2/sessions/199ac56c-c9a7-40f6-8a89-be6b74a0b3b4.trajectory.jsonl</code></li>
+<li><code>2/sessions/2771fa5c-bb13-4c1d-9831-3bdf88b183d3.trajectory.jsonl</code></li>
+<li><code>2/sessions/befafabd-68a7-4c94-9f5e-a08e3de54c58.jsonl</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>brain</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>2/brain</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 60 · <strong>Size:</strong> 1.8 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>2/brain/neo4j/schema/indexes.cypher</code></li>
+<li><code>2/brain/ontology/external_standards_crosswalk.json</code></li>
+<li><code>2/brain/ontology/datasets/arts-media-culture/knowledge_domains.json</code></li>
+<li><code>2/brain/ontology/datasets/sciences-technology/knowledge_domains.json</code></li>
+<li><code>2/brain/ontology/datasets/humanities-society/knowledge_domains.json</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>projects</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/projects</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 40 · <strong>Size:</strong> 6.3 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li class='twin'>Cross-bucket twin: <code>projects</code> in [&#x27;2&#x27;, &#x27;3&#x27;] — possible same project / possible diverged copies</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/projects/-home-[user]--openclaw-workspace/1ce6acd5-e99c-423b-8805-690ea73dc2eb.jsonl</code></li>
+<li><code>3/projects/-home-[user]--openclaw-workspace/35b9f923-fa79-4bed-8045-c72ba68120ff.jsonl</code></li>
+<li><code>3/projects/-home-[user]--openclaw-workspace/972b6886-1397-4561-a6c5-ccb0221c097e.jsonl</code></li>
+<li><code>3/projects/-home-[user]--openclaw-workspace/cf4dc1fd-9761-4b88-b868-b5771807a16e.jsonl</code></li>
+<li><code>3/projects/-home-[user]--openclaw-workspace/78d02749-1bdf-4566-b36b-5ec013a3109e.jsonl</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>-home-[user]--openclaw-workspace</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/-home-[user]--openclaw-workspace</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 39 · <strong>Size:</strong> 6.3 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/-home-[user]--openclaw-workspace/1ce6acd5-e99c-423b-8805-690ea73dc2eb.jsonl</code></li>
+<li><code>3/-home-[user]--openclaw-workspace/35b9f923-fa79-4bed-8045-c72ba68120ff.jsonl</code></li>
+<li><code>3/-home-[user]--openclaw-workspace/972b6886-1397-4561-a6c5-ccb0221c097e.jsonl</code></li>
+<li><code>3/-home-[user]--openclaw-workspace/cf4dc1fd-9761-4b88-b868-b5771807a16e.jsonl</code></li>
+<li><code>3/-home-[user]--openclaw-workspace/78d02749-1bdf-4566-b36b-5ec013a3109e.jsonl</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>wiki</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/wiki</code></li>
+<li><strong>Name source:</strong> readme/manifest</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 28 · <strong>Size:</strong> 27.0 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/wiki/INDEX.md</code></li>
+<li><code>3/wiki/main/index.md</code></li>
+<li><code>3/wiki/main/reports/index.md</code></li>
+<li><code>3/wiki/main/syntheses/index.md</code></li>
+<li><code>3/wiki/main/concepts/index.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>sessions</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/sessions</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 25 · <strong>Size:</strong> 3.6 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li class='twin'>Cross-bucket twin: <code>sessions</code> in [&#x27;2&#x27;, &#x27;3&#x27;] — possible same project / possible diverged copies</li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/sessions/ca40d771-f888-4c5b-9946-02b8fc62347a.jsonl.codex-app-server.json</code></li>
+<li><code>3/sessions/edb225a2-0bc5-44ac-bac2-c136ead7cae6.jsonl</code></li>
+<li><code>3/sessions/sessions.json</code></li>
+<li><code>3/sessions/edb225a2-0bc5-44ac-bac2-c136ead7cae6.jsonl.codex-app-server.json</code></li>
+<li><code>3/sessions/b5245336-87e5-45c4-b55f-8a28d4778e8e.trajectory.jsonl</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>memory</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>2/memory</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 17 · <strong>Size:</strong> 188.1 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li class='twin'>Cross-bucket twin: <code>memory</code> in [&#x27;2&#x27;, &#x27;3&#x27;, &#x27;4&#x27;] — possible same project / possible diverged copies</li>
+<li><strong>Representative files:</strong><ul>
+<li><code>2/memory/schema/postgres_openclaw_memory.sql</code></li>
+<li><code>2/memory/schema/lcars_ontology_mapping.json</code></li>
+<li><code>2/memory/schema/lcars_ontology.md</code></li>
+<li><code>2/memory/journal_branching.py</code></li>
+<li><code>2/memory/app.py</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>memory</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/memory</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 14 · <strong>Size:</strong> 763.1 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li class='twin'>Cross-bucket twin: <code>memory</code> in [&#x27;2&#x27;, &#x27;3&#x27;, &#x27;4&#x27;] — possible same project / possible diverged copies</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared filename token &#x27;main&#x27; (11/14)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/memory/main.sqlite.tmp-03a317d5-3573-4a70-bc86-c89feddd7450</code></li>
+<li><code>3/memory/main.sqlite.tmp-67736c6f-dc8f-4977-beea-b86a6b9b583c</code></li>
+<li><code>3/memory/main.sqlite.tmp-e191d3d7-0aae-4be0-b10e-1e105b595080</code></li>
+<li><code>3/memory/main.sqlite.tmp-4933627c-b510-4f09-88f3-ee4c1a759ac9</code></li>
+<li><code>3/memory/main.sqlite.tmp-3cd3c7ae-63f9-4612-accd-ec0b8b6beb89</code></li>
+</ul></li>
+<li><strong>Loose files attached (2):</strong><ul>
+<li><code>3/scripts/reseed_memory_system.sh</code></li>
+<li><code>3/scripts/wipe_memory_system.sh</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>graph-views</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/graph-views</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 11 · <strong>Size:</strong> 18.7 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared filename token &#x27;mira&#x27; (11/11)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/graph-views/mira-lcars-ontology-report.json</code></li>
+<li><code>3/graph-views/mira-lcars-local-graph.json</code></li>
+<li><code>3/graph-views/mira-entity-graph.html</code></li>
+<li><code>3/graph-views/mira-lcars-local-graph.html</code></li>
+<li><code>3/graph-views/mira-relationship-graph.json</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>Loose Markdown files in 3/</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3</code></li>
+<li><strong>Name source:</strong> path+ext</li>
+<li><strong>Confidence:</strong> Low — numeric preservation bucket (no semantics)</li>
+<li><strong>Files:</strong> 10 · <strong>Size:</strong> 272.8 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>readme/manifest present</li>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/README.md</code></li>
+<li><code>3/Is AI Hiding Its Full Power With Geoffrey Hinton.md</code></li>
+<li><code>3/AI Just Made ADHD an Advantage.md</code></li>
+<li><code>3/please-create-a-plan-ethereal-nest.md</code></li>
+<li><code>3/i-am-in-the-foamy-sunset.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>cron</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>cron</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 7 · <strong>Size:</strong> 23.7 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared content token &#x27;delivered&#x27; (4/7)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>cron/runs/0f57bcec-6664-4c54-a877-75d5413963c6.jsonl</code></li>
+<li><code>cron/runs/62d8cd53-090f-4233-8712-fddeed9f7c1a.jsonl</code></li>
+<li><code>cron/jobs.json</code></li>
+<li><code>cron/runs/23d8c0c1-4b54-4368-ad1b-0d02ea31a5f6.jsonl</code></li>
+<li><code>cron/jobs-state.json</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>-home-miraember-projects-Mira-OS</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>4/-home-miraember-projects-Mira-OS</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 7 · <strong>Size:</strong> 1.5 MB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>tight modtime cluster (~0.0d span)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>4/-home-miraember-projects-Mira-OS/1cbe850b-7603-4bff-951f-667092541e1b.jsonl</code></li>
+<li><code>4/-home-miraember-projects-Mira-OS/memory/schema_design.md</code></li>
+<li><code>4/-home-miraember-projects-Mira-OS/memory/project_vision.md</code></li>
+<li><code>4/-home-miraember-projects-Mira-OS/memory/memory_architecture.md</code></li>
+<li><code>4/-home-miraember-projects-Mira-OS/memory/user_chris.md</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>cron</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>2/cron</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 5 · <strong>Size:</strong> 4.6 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Evidence:</strong><ul>
+<li>shared filename token &#x27;jobs&#x27; (3/5)</li>
+</ul></li>
+<li><strong>Representative files:</strong><ul>
+<li><code>2/cron/jobs.json</code></li>
+<li><code>2/cron/jobs-state.json</code></li>
+<li><code>2/cron/runs/23d8c0c1-4b54-4368-ad1b-0d02ea31a5f6.jsonl</code></li>
+<li><code>2/cron/runs/0f57bcec-6664-4c54-a877-75d5413963c6.jsonl</code></li>
+<li><code>2/cron/jobs.json.bak</code></li>
+</ul></li>
+</ul></div>
+<div class='cluster'>
+<div class='cluster-head'>
+<h3>services</h3>
+<span class='badge Low'>Low</span>
+</div>
+<ul>
+<li><strong>Path:</strong> <code>3/services</code></li>
+<li><strong>Name source:</strong> directory-name</li>
+<li><strong>Confidence:</strong> Low — single signal / weak evidence</li>
+<li><strong>Files:</strong> 4 · <strong>Size:</strong> 6.5 KB</li>
+<li><strong>Modified:</strong> 2026-05-27 → 2026-05-27</li>
+<li><strong>Representative files:</strong><ul>
+<li><code>3/services/install-brain-services.sh</code></li>
+<li><code>3/services/verify-brain-stack.sh</code></li>
+<li><code>3/services/mira-cognee.service</code></li>
+<li><code>3/services/mira-neo4j.service</code></li>
+</ul></li>
+</ul></div>
+</div>
+<section class='section'>
+<h3>Cross-bucket twins</h3><ul>
+<li class='twin'><code>projects</code> in buckets [&#x27;2&#x27;, &#x27;3&#x27;] — possible same project / diverged copies.</li>
+<li class='twin'><code>sessions</code> in buckets [&#x27;2&#x27;, &#x27;3&#x27;] — possible same project / diverged copies.</li>
+<li class='twin'><code>memory</code> in buckets [&#x27;2&#x27;, &#x27;3&#x27;, &#x27;4&#x27;] — possible same project / diverged copies.</li>
+</ul>
+</section>
+<h3>Unsorted / loose files (9)</h3>
+<ul class='compact-list'>
+<li><code>top-level-knowledge-domains.md</code></li>
+<li><code>3/source/decommission-memgraph-enable-neo4j.sh</code></li>
+<li><code>3/planning/2026-05-04-memgraph-lab-json-schema-plan.md</code></li>
+<li><code>4/progress.md</code></li>
+<li><code>4/history.jsonl</code></li>
+<li><code>hooks-disabled/cross-channel-log/HOOK.md</code></li>
+<li><code>hooks-disabled/cross-channel-log/handler.ts</code></li>
+<li><code>2/claude2obsidian/claude2obsidian.py</code></li>
+<li><code>2/claude2obsidian/.claude/settings.local.json</code></li>
+</ul>
+</section>
+<section class='section'>
+<h2>Narrative Wrap</h2>
+<div class='narrative'>
+<p>Scanned <strong>6365</strong> files and grouped them into <strong>35</strong> clusters (High 1, Medium 15, Low 19 confidence).</p>
+<p>The best-evidenced clusters are <strong>LCARS</strong> (1276 files), <strong>Vault</strong> (1086 files), <strong>MiraOS</strong> (663 files).</p>
+<p>Worth a look: <strong>cron</strong> is small (5 files) and last touched 2026-05-27 — it may be easy to miss.</p>
+<p><strong>3</strong> cross-bucket twin(s) appear across preservation buckets (<code>projects</code>, <code>sessions</code>, <code>memory</code>); these are possible duplicates or diverged copies worth reconciling.</p>
+<p><strong>9</strong> loose file(s) did not attach to any cluster and sit in the unsorted bucket.</p>
+<p>Suggested next move (advisory only): review the cross-bucket twins first, then the low-confidence containers, before deciding any reorganization. Nothing here has been changed.</p>
+</div>
+</section>
+<section class='section'>
+<h2>Future Projections (stub)</h2>
+<div class='note'><p>Later versions can project these clusters into PARA, GTD, Obsidian/MOC, or a custom layout. v0 keeps the source map and evidence primary. No machinery here.</p></div>
+</section>
+</main>
+</body></html>
