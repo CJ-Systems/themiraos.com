@@ -6,7 +6,7 @@
   {{ .Content }}
 
   <p class="footer">
-    <a href="{{ "/" | absURL }}">themiraos.com</a> · {{ .Date.Format "2006" }}
+    <a href="{{ "/posts/" | absURL }}">← Updates</a> · <a href="{{ "/" | absURL }}">themiraos.com</a> · {{ .Date.Format "2006" }}
     <span class="tagline">{{ .Site.Params.tagline }}</span>
   </p>
 {{ end }}
